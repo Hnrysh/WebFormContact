@@ -6,11 +6,24 @@ namespace WebFormContact.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly ApplicationDbContext _context;
+        public HomeController(ApplicationDbContext context)
         {
-            _logger = logger;
+            _context = context;
+        }
+
+        [HttpPost]
+        public IActionResult Submit(ContactMessage model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Index", model);
+            }
+            _context.ContactMessages.Add(model);
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Tu mensaje ha sido enviado con éxito.";
+            return RedirectToAction("Index");
         }
 
         public IActionResult Index()
@@ -29,4 +42,5 @@ namespace WebFormContact.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
+
 }
